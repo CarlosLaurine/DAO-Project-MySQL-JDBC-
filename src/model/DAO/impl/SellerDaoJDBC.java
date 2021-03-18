@@ -56,7 +56,7 @@ public class SellerDaoJDBC implements SellerDAO{
 		
 		try {
 			//Preparing Query Selection Command with ? parameter for later replacement
-			pst = con.prepareStatement("Select seller.*, department.Name as DepName FROM seller INNER JOIN department ON seller.DepartmentId = departmentId WHERE seller.Id = ?");
+			pst = con.prepareStatement("Select seller.*, department.Name AS DepName FROM seller INNER JOIN department ON seller.DepartmentId = departmentId WHERE seller.Id = ?");
 			
 			//Replacing Statement Parameters
 			pst.setInt(1, id);
@@ -68,23 +68,12 @@ public class SellerDaoJDBC implements SellerDAO{
 	
 			//Going through ResultSet Data to fulfill Department and Seller Objects while relating them through Dependence       
 			
-			Department dep = new Department();	
-			dep.setId(rs.getInt("DepartmentId"));
-			dep.setName(rs.getString("DepName"));
+			Department dep = instantiateDepartment(rs);
 			
-			Seller sel = new Seller();
-			sel.setId(rs.getInt("Id"));
-			sel.setName(rs.getString("Name"));
-			sel.setEmail(rs.getString("Email"));
-			sel.setBaseSalary(rs.getDouble("BaseSalary"));
-			sel.setBirthDate(rs.getDate("BirthDate"));
+			Seller sel = instantiateSeller(rs, dep);
 			
-			/*Now, it is noteworthy to state that the Department setting at the Seller Object sel
-			  will have as parameter the Department object dep itself, once Seller stablishes
-			  a Dependency-between-Objects relation with the already fully set Department Object
-			*/
-			sel.setDepartment(dep);
 			return sel;
+			
 			}
 			else {
 				
@@ -112,4 +101,36 @@ public class SellerDaoJDBC implements SellerDAO{
 		
 	}
 
+
+	/*Creating a Specific Method to Instantiate a Department Object through a Result Set
+	  in order to provide Reuse for its Logic in other CRUD Methods' bodies */
+	
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		
+		Department dep = new Department();	
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		
+		return dep;
+	}
+
+	/*Creating a Specific Method to Instantiate a Seller Object through a Result Set
+	  in order to provide Reuse for its Logic in other CRUD Methods' bodies */
+	
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller sel = new Seller();
+		sel.setId(rs.getInt("Id"));
+		sel.setName(rs.getString("Name"));
+		sel.setEmail(rs.getString("Email"));
+		sel.setBaseSalary(rs.getDouble("BaseSalary"));
+		sel.setBirthDate(rs.getDate("BirthDate"));
+		
+		/*Now, it is noteworthy to state that the Department setting at the Seller Object sel
+		  will have as parameter the Department object dep itself, once Seller establishes
+		  a Dependency-between-Objects relation with the already fully set Department Object
+		*/
+		sel.setDepartment(dep);
+		
+		return sel;
+	}
 }
