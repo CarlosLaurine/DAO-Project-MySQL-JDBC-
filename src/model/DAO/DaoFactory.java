@@ -2,6 +2,8 @@ package model.DAO;
 
 import model.DAO.impl.SellerDaoJDBC;
 
+import db.DB;
+
 //Creating DaoFactory Class with Static Methods to Instance the DAOs
 
 public class DaoFactory {
@@ -14,6 +16,6 @@ public class DaoFactory {
 	
 	public static SellerDAO createSellerDAO() {
 		
-		return new SellerDaoJDBC();
+		return new SellerDaoJDBC(DB.getConnection());
 	}
 }
