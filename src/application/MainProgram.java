@@ -36,13 +36,25 @@ public class MainProgram {
 		
 		
 		/*===========================================
-		  =========TEST #1: Seller findById =========
+		  =====TEST #2: Seller findByDepartment =====
 		  ===========================================*/
 		System.out.println("===========================================\r\n"
 				+ "=====TEST #2: Seller findByDepartment =====\r\n"
 				+ "===========================================\r\n");
 		Department dep = new Department (2, null);
 		List<Seller> sellerList = sellerDao.findByDepartment(dep);
+		//Listing sellerList Elements
+		for (Seller seller : sellerList) {
+			System.out.println(seller);
+		}
+		
+		/*===========================================
+		  =========TEST #3: Seller findAll =========
+		  ===========================================*/
+		System.out.println("===========================================\r\n"
+				+ "==========TEST #3: Seller findAll==========\r\n"
+				+ "===========================================\r\n");
+		sellerList = sellerDao.findAll();
 		//Listing sellerList Elements
 		for (Seller seller : sellerList) {
 			System.out.println(seller);

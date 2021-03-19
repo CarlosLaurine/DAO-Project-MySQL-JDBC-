@@ -46,8 +46,68 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		// Setting Objects for JDBC API Classes PreparedStatement and ResultSet to
+				// execute the Query
+
+				PreparedStatement pst = null;
+				ResultSet rs = null;
+
+				try {
+					// Preparing Query Selection Command without WHERE Restriction in order to FIND ALL
+					pst = con.prepareStatement(
+							"SELECT seller.*, department.Name as DepName FROM seller INNER JOIN department ON seller.DepartmentId = department.Id ORDER BY Name");
+
+					// Storing Query Execution Results in a Result Set table
+					rs = pst.executeQuery();
+
+					// Declaring Seller List to store ResultSet's Multiple Values
+					List<Seller> sellersList = new ArrayList<>();
+					/* Declaring Map to ensure no Department objects will be Instanced 
+					   more than once
+					*/
+					Map<Integer, Department> map = new HashMap<>();
+					/* While loop to go through all ResultSet Object rs columns in case there are
+					   Multiple Values
+					*/
+					while (rs.next()) {
+						// Using Map to filter similar Department IDs to the one at while loop
+						Department dep1 = map.get(rs.getInt("DepartmentId"));
+						/* Testing if Department Object dep's DepartmentID already was added to the
+						   map/list*/
+						if (dep1 == null) {
+							/* If rs' DepartmentId is unique up to this moment, then a new Department Object
+							   will be instanced and added to the Map
+							*/
+							dep1 = instantiateDepartment(rs);
+							map.put(rs.getInt("DepartmentId"), dep1);
+						}
+
+						/* Going through ResultSet Data to fulfill Seller Objects while relating them
+						   through Dependence
+						*/
+
+						Seller sel = instantiateSeller(rs, dep1);
+						// Adding Seller Object sel to the Seller List's Node
+						sellersList.add(sel);
+					}
+					return sellersList;
+
+				}
+				// Handling specific exceptions
+				catch (SQLException e) {
+					/*
+					 * Throwing our custom DBException and passing IOException message as a
+					 * parameter in DBException constructor. Since it extends RuntimeException, this
+					 * technique will allow us to get rid of undesired compilation alerts
+					 */
+					throw new DBException(e.getMessage());
+				}
+				
+				// Using finally block to ensure all external resources to JVM will be closed
+				finally {
+					DB.closeStatement(pst);
+					DB.closeResultSet(rs);
+				}
 	}
 
 	@Override
