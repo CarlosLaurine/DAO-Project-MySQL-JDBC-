@@ -165,7 +165,46 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		// Setting Object for JDBC API Class PreparedStatement execute the Query
+		PreparedStatement st = null;
+		try {
+			
+			// Preparing Query Selection Delete Command with ? parameter for later replacement
+			st = con.prepareStatement("DELETE FROM seller WHERE Id = ?");
+			
+			/*Replacing ? parameter with the chosen Id for the deletion process 
+			  identification of the target row at SQL table
+			 */ 
+			st.setInt(1, id);
+
+			/*Executing command with all updates with an integer of net number of 
+	          lines as return, and saving this information in an int variable 
+	          rowsChanged
+	        */
+			int rowsChanged = st.executeUpdate();
+			
+			if(rowsChanged == 0) {
+				
+				/*Throwing a custom Exception DBExceptionn in case the insertion happens, 
+				  but the number of rows changed remain zero since it represents
+				  a significant error quite possibly originated from the user's input*/
+				
+				throw new DBException("An Error occurred! No Rows were Changed. Please, check if your Input was a valid Id!");		
+			}
+		}
+		// Handling specific exceptions
+		catch (SQLException e) {
+			/*
+			 * Throwing our custom DBException and passing IOException message as a
+			 * parameter in DBException constructor. Since it extends RuntimeException, this
+			 * technique will allow us to get rid of undesired compilation alerts
+			 */
+			throw new DBException(e.getMessage());
+		}
+		// Using finally block to ensure all external resources to JVM will be closed
+		finally {
+			DB.closeStatement(st);
+		}
 
 	}
 

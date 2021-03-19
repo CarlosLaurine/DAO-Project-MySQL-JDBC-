@@ -2,6 +2,7 @@ package application;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import model.DAO.DaoFactory;
 import model.DAO.SellerDAO;
@@ -11,6 +12,8 @@ import model.entities.Seller;
 public class MainProgram {
 
 	public static void main(String[] args) {
+		
+		Scanner sc = new Scanner(System.in);
 		
 		/*Instancing sellerDAO  through DaoFactory Method createSellerDAO
 		  instead of direct instancing*/
@@ -93,8 +96,23 @@ public class MainProgram {
 		sel.setName("Ruffus Pringles");
 		//Calling DAOJDBC Update Method to transmit the update to the DataBase table
 		sellerDao.update(sel);
-		//Signaling that the process ran trough full completion without exceptions
+		//Signaling that the update process ran trough full completion without exceptions
 		System.out.println("Update Process Completed!");
+
+		/*===========================================
+		  =========TEST #6: Seller delete =========
+		  ===========================================*/
+		System.out.println("===========================================\r\n"
+				+ "==========TEST #6: Seller  delete==========\r\n"
+				+ "===========================================\r\n");
+		//Entering the intended Id for deletion process
+		System.out.println("Enter Id for the target Seller to be deleted from DataBase");
+		int id = sc.nextInt();
+		//Deleting corresponding seller
+		sellerDao.deleteById(id);
+		//Signaling that the deletion process ran trough full completion without exceptions
+		System.out.println("Delete Process Completed!");
+		sc.close();
 
 	}
 
