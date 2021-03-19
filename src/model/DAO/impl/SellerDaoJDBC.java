@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,81 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public void insert(Seller sel) {
-		// TODO Auto-generated method stub
+		
+		// Setting Object for JDBC API Class PreparedStatement execute the Query
+		PreparedStatement pst = null;
+		
+		try {
+			/*Setting PreparedStatement Object pst with Insertion command 
+			  with parameters passed as values to be replaced right after*/
+			
+			/*Also overriding prepareStatement method's contructor to include
+			a new parameter - the Generated Key from inserted seller*/ 
+			
+			//OBS1: No case sensitivity at the command string
+			pst = con.prepareStatement(
+					"INSERT INTO seller "
+					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
+					+ "VALUES "
+					+ "(?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+			
+			/*Replacing ? parameters with the respective attributes from the Seller Object sel 
+			  for the new insertion
+			*/
+
+			pst.setString(1, sel.getName());
+			pst.setString(2, sel.getEmail());
+			/*To work with Data at SQL, java.sql.Date must be imported
+			  instead of the usual java.util.Date*/
+			pst.setDate(3, new java.sql.Date(sel.getBirthDate().getTime()));
+			pst.setDouble(4, sel.getBaseSalary());
+			/*To get the Department Id associated with the Seller, first it is necessary to access
+			  the Department object related to it as a Dependency Attribute, and then get its Id */
+			pst.setInt(5, sel.getDepartment().getId());
+
+			/*Executing command with all updates with an integer of net number of 
+	          lines as return, and saving this information in an int variable 
+	          rowsChanged
+	        */
+			int rowsChanged = pst.executeUpdate();
+
+			if (rowsChanged > 0) {
+				/*Getting all generated keys from Statement object and storing 
+				  them at a Result Set object*/
+				ResultSet rs = pst.getGeneratedKeys();
+				//Going through ResultSet generated aux table to get the Key
+				if (rs.next()) {
+					int id = rs.getInt(1);
+					/*Setting the key as the Seller Object id, 
+					  thus fulfilling all of its attributes */
+					
+					sel.setId(id);
+				}
+				DB.closeResultSet(rs);
+			}
+			else {
+				/*Throwing a custom Exception DBExceptionn in case the insertion happens, 
+				  but the number of rows changed remain zero since it represents
+				  a significant unexpected error and must be identified*/
+				throw new DBException("An Unexpected Error occurred! Somehow, no Rows were Changed!");
+			}
+		}
+		//Handling specific exceptions
+		catch (SQLException e) {
+			/*
+			 * Throwing our custom DBException and passing IOException message as a
+			 * parameter in DBException superclass constructor. Since it extends RuntimeException, 
+			 * this technique will allow us to get rid of undesired compilation alerts
+			 * and also show the respective problem message in case it is thrown during
+			 * code Runtime
+			 */
+			throw new DBException(e.getMessage());
+		}
+		//Using finally block to ensure all external resources to JVM will be closed
+		finally {
+			DB.closeStatement(pst);
+		}
 
 	}
 
@@ -46,8 +121,8 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public List<Seller> findAll() {
-		// Setting Objects for JDBC API Classes PreparedStatement and ResultSet to
-				// execute the Query
+		/* Setting Objects for JDBC API Classes PreparedStatement and ResultSet to
+		   execute the Query*/
 
 				PreparedStatement pst = null;
 				ResultSet rs = null;
@@ -64,7 +139,7 @@ public class SellerDaoJDBC implements SellerDAO {
 					List<Seller> sellersList = new ArrayList<>();
 					/* Declaring Map to ensure no Department objects will be Instanced 
 					   more than once
-					*/
+					   */
 					Map<Integer, Department> map = new HashMap<>();
 					/* While loop to go through all ResultSet Object rs columns in case there are
 					   Multiple Values
