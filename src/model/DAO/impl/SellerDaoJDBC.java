@@ -109,7 +109,57 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public void update(Seller sel) {
-		// TODO Auto-generated method stub
+		// Setting Object for JDBC API Class PreparedStatement execute the Query
+				PreparedStatement pst = null;
+				
+				try {
+					/*Setting PreparedStatement Object pst with Insertion command 
+					  with parameters passed as values to be replaced right after*/
+					
+					/*Also overriding prepareStatement method's contructor to include
+					a new parameter - the Generated Key from inserted seller*/ 
+					
+					//OBS1: No case sensitivity at the command string
+					pst = con.prepareStatement( "UPDATE seller SET Name=?, Email=?, BirthDate=?, BaseSalary=?, DepartmentId=? WHERE Id = ?");
+					
+					/*Replacing ? parameters with the respective attributes from the Seller Object sel 
+					  for the new insertion
+					*/
+
+					pst.setString(1, sel.getName());
+					pst.setString(2, sel.getEmail());
+					/*To work with Data at SQL, java.sql.Date must be imported
+					  instead of the usual java.util.Date*/
+					pst.setDate(3, new java.sql.Date(sel.getBirthDate().getTime()));
+					pst.setDouble(4, sel.getBaseSalary());
+					/*To get the Department Id associated with the Seller, first it is necessary to access
+					  the Department object related to it as a Dependency Attribute, and then get its Id */
+					pst.setInt(5, sel.getDepartment().getId());
+					/*Since it is an Update, the Seller Object sel already has a Generated Key Id,
+					  and it will also be set here to replace the last ? parameter at the Query
+					  Update Command thus identifying the Seller that will be modified at the table*/
+					pst.setInt(6, sel.getId());
+
+					//Executing Update
+				    pst.executeUpdate();
+
+				}
+				//Handling specific exceptions
+				catch (SQLException e) {
+					/*
+					 * Throwing our custom DBException and passing IOException message as a
+					 * parameter in DBException superclass constructor. Since it extends RuntimeException, 
+					 * this technique will allow us to get rid of undesired compilation alerts
+					 * and also show the respective problem message in case it is thrown during
+					 * code Runtime
+					 */
+					throw new DBException(e.getMessage());
+				}
+				//Using finally block to ensure all external resources to JVM will be closed
+				finally {
+					DB.closeStatement(pst);
+				}
+
 
 	}
 

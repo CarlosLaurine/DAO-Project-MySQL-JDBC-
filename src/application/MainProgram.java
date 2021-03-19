@@ -81,6 +81,20 @@ public class MainProgram {
 		
 		System.out.println("Insertion Completed! Inserted Seller's new Id = " + sel2.getId());
 		
+		/*===========================================
+		  =========TEST #5: Seller update =========
+		  ===========================================*/
+		System.out.println("===========================================\r\n"
+				+ "==========TEST #5: Seller  update==========\r\n"
+				+ "===========================================\r\n");
+		//Loading a Seller Object sel with an existent seller at the DataBase
+		sel = sellerDao.findById(1);
+		//Setting a new name (Updating) Seller Object sel
+		sel.setName("Ruffus Pringles");
+		//Calling DAOJDBC Update Method to transmit the update to the DataBase table
+		sellerDao.update(sel);
+		//Signaling that the process ran trough full completion without exceptions
+		System.out.println("Update Process Completed!");
 
 	}
 
